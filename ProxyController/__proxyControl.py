@@ -1,3 +1,5 @@
+from threading import Thread as _Thread
+from typing import Callable as _Callable
 from typing import Tuple as _Tuple
 from winreg import HKEY_CURRENT_USER as _HKCU
 from winreg import KEY_ALL_ACCESS as _KAA
@@ -8,10 +10,18 @@ from winreg import OpenKey as _OpenKey
 from winreg import QueryValueEx as _QueryValueEx
 from winreg import SetValueEx as _SetValueEx
 
+from win32api import REG_NOTIFY_CHANGE_LAST_SET as _REG_NOTIFY_CHANGE_LAST_SET
+from win32api import RegNotifyChangeKeyValue as _RegNotifyChangeKeyValue
+
 _proxyKey: str = r'Software\Microsoft\Windows\CurrentVersion\Internet Settings'
 _proxyHostVar: str = 'ProxyServer'
 _proxyBypassVar: str = 'ProxyOverride'
 _proxyEnabledVar: str = 'ProxyEnable'
+
+_proxyWatchStateCallback: _Callable[[bool], None] | None = None
+_watching = False
+
+_proxyStateWatchThread: _Thread | None = None
 
 
 def setProxy(host: str, port: int, bypass: str | None = None) -> None:
@@ -34,7 +44,7 @@ def queryCurrentProxy() -> _Tuple[str, int, str]:
 def queryProxyState() -> bool:
     with _OpenKey(_HKCU, _proxyKey) as key:
         state, _ = _QueryValueEx(key, _proxyEnabledVar)
-    return int(state) is not 0
+    return int(state) != 0
 
 
 def setProxyState(state: bool) -> None:
@@ -48,6 +58,39 @@ def toggleProxyState() -> None:
         state, _ = _QueryValueEx(key, _proxyEnabledVar)
         _SetValueEx(key, _proxyEnabledVar, 0, _RDWs, int(not bool(state)))
         _CloseKey(key)
+
+
+def setProxyStateWatchCallback(callback: _Callable[[bool], None]) -> None:
+    global _proxyWatchStateCallback
+    _proxyWatchStateCallback = callback
+
+
+def startWatchingProxyState() -> bool:
+    if _watching or not _proxyWatchStateCallback:
+        return False
+    global _proxyStateWatchThread
+    _proxyStateWatchThread = _Thread(target=_watchProxyStateThread)
+    _proxyStateWatchThread.start()
+    return True
+
+
+def stopWatchingProxyState() -> None:
+    global _watching
+    _watching = False
+    if _proxyStateWatchThread:
+        _proxyStateWatchThread._stop()
+
+
+def _watchProxyStateThread():
+    global _watching
+    _watching = True
+    with _OpenKey(_HKCU, _proxyKey) as key:
+        while _watching:
+            _RegNotifyChangeKeyValue(key, False, _REG_NOTIFY_CHANGE_LAST_SET,
+                                     None, False)
+            if _proxyWatchStateCallback:
+                _proxyWatchStateCallback(queryProxyState())
+    _watching = False
 
 
 # test

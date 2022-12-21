@@ -1,2 +1,2 @@
-flask
-pystray
+pyqt6
+pywin32

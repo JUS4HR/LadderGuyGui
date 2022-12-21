@@ -1,6 +1,10 @@
-from typing import Dict as _Dict, List as _List, Tuple as _Tuple
+from json import dump as _jsonDump
+from json import load as _jsonLoad
+from os import makedirs as _osMakedirs
 from os import path as _osPath
-from json import load as _jsonLoad, dump as _jsonDump
+from typing import Dict as _Dict
+from typing import List as _List
+from typing import Tuple as _Tuple
 
 configPath = ""
 
@@ -16,13 +20,16 @@ def _getConfigPath() -> str:
 def _addToConfig(name: str, config: _Dict[str,
                                           str]) -> _Tuple[bool, str | None]:
     if not _osPath.exists(_getConfigPath()):
+        _osMakedirs(_osPath.dirname(_getConfigPath()), exist_ok=True)
         with open(_getConfigPath(), "w") as f:
             _jsonDump({}, f, indent=4)
     with open(_getConfigPath(), "r") as f:
         data: _Dict[str, _Dict[str, str]] = _jsonLoad(f)
-    for name, conf in data.items():
-        if conf == config:
-            return False, "a config with the same settings already exists"
+    for oldName, conf in data.items():
+        if oldName == name:
+            return False, "Name already exists"
+        if conf["host"] == config["host"] and conf["port"] == config["port"]:
+            return False, "Config already exists"
     data[name] = config
     with open(_getConfigPath(), "w") as f:
         _jsonDump(data, f, indent=4)
