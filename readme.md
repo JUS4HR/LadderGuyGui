@@ -23,4 +23,4 @@ Windows only because it uses win32api.
 ---
 * Install modules: `pip install -r requirements.txt`
 * Build to exe file: `pyinstaller main.spec`
-* Or you can grab the latest release [here](https://github.com/jus4hr/LadderGuyGui/releases).
+* ~~Or you can grab the latest release [here](https://github.com/jus4hr/LadderGuyGui/releases).~~ The exe file was too large to upload (36MB) for some reason, so build it yourself.
