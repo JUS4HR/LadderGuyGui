@@ -2,6 +2,7 @@ from json import dump as _jsonDump
 from json import load as _jsonLoad
 from os import makedirs as _osMakedirs
 from os import path as _osPath
+from sys import executable as _sysExecutable
 from typing import Dict as _Dict
 from typing import List as _List
 from typing import Tuple as _Tuple
@@ -12,7 +13,7 @@ configPath = ""
 def _getConfigPath() -> str:
     global configPath
     if configPath == "":
-        configPath = _osPath.join(_osPath.dirname(__file__),
+        configPath = _osPath.join(_osPath.dirname(_sysExecutable),
                                   "conf/proxyConfig.json")
     return configPath
 
