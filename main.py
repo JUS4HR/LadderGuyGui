@@ -80,6 +80,27 @@ def onNewConfig():
         refreshConfigList()
         updateSelList()
 
+def onUpdateConfig():
+    global configList, activeConfig, trayMenu, confNameList
+    if activeConfig[1] is not None and activeConfig[1] < len(
+            configList) and configList[
+                activeConfig[1]].getName() == activeConfig[0]:
+        dialog = gui.qtController.InputPopup("Update Config")
+        dialog.addDescription(
+            "Are you sure you want to update the config \"{}\"?".format(
+                activeConfig[0]))
+        if dialog.pop()[0]:
+            currentSettings = proxy.queryCurrentProxy()
+            configList[activeConfig[1]].setHost(currentSettings[0])
+            configList[activeConfig[1]].setPort(currentSettings[1])
+            configList[activeConfig[1]].setBypass(currentSettings[2])
+            configList[activeConfig[1]].saveToConf()
+            refreshConfigList()
+            updateSelList()
+    else:
+        alert = gui.qtController.AlertPopup("No Config Selected",
+                                             "You have to select a config to update it.")
+        alert.pop()
 
 def onDelConfig():
     global configList, activeConfig, trayMenu, confNameList
@@ -94,7 +115,10 @@ def onDelConfig():
             configList[activeConfig[1]].removeFromConf()
             refreshConfigList()
             updateSelList()
-
+        else:
+            alert = gui.qtController.AlertPopup("No Config Selected",
+                                                 "You have to select a config to delete it.")
+            alert.pop()
 
 def onOpenSettings():
     startfile("ms-settings:network-proxy")
@@ -123,6 +147,8 @@ if __name__ == '__main__':
             utils.getStartup())),
     trayMenu.addTopAction(
         gui.qtController.TrayAction(trayMenu, "New Config", onNewConfig))
+    trayMenu.addTopAction(
+        gui.qtController.TrayAction(trayMenu, "Update Config", onUpdateConfig))
     trayMenu.addBottomAction(
         gui.qtController.TrayAction(trayMenu, "Delete Selected", onDelConfig))
     trayMenu.addBottomAction(
