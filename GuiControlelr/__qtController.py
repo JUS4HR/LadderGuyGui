@@ -4,6 +4,7 @@ from typing import Dict as _Dict
 from typing import List as _List
 from typing import Tuple as _Tuple
 
+import qdarktheme as _qdarktheme
 from PyQt6.QtGui import QAction as _QAction
 from PyQt6.QtGui import QIcon as _QIcon
 from PyQt6.QtGui import QIntValidator as _QIntValidator
@@ -148,7 +149,9 @@ class App:
         self.__app.setApplicationName(name)
         self.__app.setApplicationDisplayName(name)
         self.__app.setQuitOnLastWindowClosed(False)
-
+        _qdarktheme.setup_theme("auto")
+        _qdarktheme.setup_theme()
+        
         self.__tray = _QSystemTrayIcon(self.__app)
         self.__tray.setIcon(_QIcon(iconPath))
 

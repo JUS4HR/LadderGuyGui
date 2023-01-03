@@ -19,7 +19,7 @@ Windows only because it uses win32api.
 - [x] ~~Add a shortcut to open windows proxy settings page.~~
 - [x] ~~Auto start with windows.~~
 - [x] ~~Update current selected config with active settings~~
-- [ ] Match menu and popup window theme with current windows theme.
+- [x] ~~Match menu and popup window theme with current windows theme.~~
 
 **Usage**
 ---
